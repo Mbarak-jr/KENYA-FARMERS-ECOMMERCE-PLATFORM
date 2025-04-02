@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-// Import your register action from auth slice
-// import { register } from "../../features/auth/authSlice";
+import useAuth from '../hooks/useAuth';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const _dispatch = useDispatch();
+  const { register } = useAuth(); // Get register function from auth context
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,7 +19,6 @@ const RegisterPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
@@ -30,31 +27,26 @@ const RegisterPage = () => {
   const validateForm = () => {
     const newErrors = {};
     
-    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
     
-    // Email validation
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
     
-    // Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
     }
     
-    // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
     
-    // Confirm password validation
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
@@ -69,16 +61,24 @@ const RegisterPage = () => {
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        // Uncomment when you have the register action
-        // await dispatch(register(formData)).unwrap();
-        // navigate("/dashboard");
-        console.log("Form submitted:", formData);
-        // For now just simulate success
-        setTimeout(() => {
-          setIsSubmitting(false);
-          alert("Registration successful! You can now log in.");
-          navigate("/login");
-        }, 1500);
+        // Use the register function from auth context
+        await register({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          role: formData.role,
+          location: "", // Default empty, can be updated later
+          ...(formData.role === 'farmer' && { farmName: "" }),
+          ...(formData.role === 'buyer' && { companyName: "" }),
+          ...(formData.role === 'transporter' && { vehicleType: "" })
+        });
+        
+        // Redirect to login with success state
+        navigate("/login", { 
+          state: { fromRegistration: true },
+          replace: true 
+        });
       } catch (error) {
         setIsSubmitting(false);
         setErrors({ 
@@ -91,7 +91,6 @@ const RegisterPage = () => {
   const roleOptions = [
     { value: "buyer", label: "Buyer" },
     { value: "farmer", label: "Farmer" },
-    { value: "vendor", label: "Vendor (Agri-inputs)" },
     { value: "transporter", label: "Transporter" },
   ];
 
@@ -134,6 +133,8 @@ const RegisterPage = () => {
           )}
           
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* All your existing form fields remain exactly the same */}
+            {/* Name Field */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Full Name
@@ -160,6 +161,7 @@ const RegisterPage = () => {
               )}
             </div>
 
+            {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
@@ -187,6 +189,7 @@ const RegisterPage = () => {
               )}
             </div>
 
+            {/* Phone Field */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                 Phone Number
@@ -213,6 +216,7 @@ const RegisterPage = () => {
               )}
             </div>
 
+            {/* Role Selection */}
             <div>
               <label htmlFor="role" className="block text-sm font-medium text-gray-700">
                 I am a
@@ -234,6 +238,7 @@ const RegisterPage = () => {
               </div>
             </div>
 
+            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
@@ -261,6 +266,7 @@ const RegisterPage = () => {
               )}
             </div>
 
+            {/* Confirm Password Field */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                 Confirm Password
@@ -287,6 +293,7 @@ const RegisterPage = () => {
               )}
             </div>
 
+            {/* Terms Checkbox */}
             <div className="flex items-center">
               <input
                 id="terms"
@@ -303,6 +310,7 @@ const RegisterPage = () => {
               </label>
             </div>
 
+            {/* Submit Button */}
             <div>
               <button
                 type="submit"
@@ -320,6 +328,7 @@ const RegisterPage = () => {
             </div>
           </form>
 
+          {/* Already have an account section */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -342,6 +351,7 @@ const RegisterPage = () => {
         </div>
       </div>
       
+      {/* Footer */}
       <div className="mt-8 text-center text-sm text-gray-500 z-10">
         <p>Need help? <a href="#" className="text-green-600 hover:text-green-500">Contact our support team</a></p>
       </div>

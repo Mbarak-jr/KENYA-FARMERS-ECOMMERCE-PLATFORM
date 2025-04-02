@@ -9,8 +9,9 @@ import RegisterPage from "./pages/RegisterPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import DashboardPage from "./pages/DashboardPage";
-import Layout from "./components/layout/Layout"; // Ensure Layout exists
-import AgriInputs from "./pages/AgriInputs"; // Ensure AgriInputs exists
+import MainLayout from "./components/layout/MainLayout"; // Renamed from Layout to be more explicit
+import DashboardLayout from "./components/dashboard/DashboardLayout"; // New dashboard-specific layout
+import AgriInputs from "./pages/AgriInputs";
 import ProduceMarket from "./pages/ProduceMarket";
 import VendorsPage from "./pages/VendorsPage";
 import TransportersPage from "./pages/TransportersPage";
@@ -20,7 +21,8 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        {/* Public routes with main layout (includes navbar) */}
+        <Route element={<MainLayout />}>
           <Route index element={<HomePage />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="products/:id" element={<ProductDetailPage />} />
@@ -37,11 +39,18 @@ const App = () => {
           <Route path="transporters/:id" element={<TransportersPage />} />
           <Route path="farmers/:id" element={<FarmersPage />} />
 
-          {/* Protected Routes */}
+          {/* Protected routes with main layout */}
           <Route element={<ProtectedRoute />}>
             <Route path="cart" element={<CartPage />} />
             <Route path="checkout" element={<CheckoutPage />} />
-            <Route path="dashboard" element={<DashboardPage />} />
+          </Route>
+        </Route>
+
+        {/* Dashboard routes with separate layout (no main navbar) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            {/* Add other dashboard sub-routes here */}
+            {/* Example: <Route path="settings" element={<DashboardSettings />} /> */}
           </Route>
         </Route>
       </Routes>

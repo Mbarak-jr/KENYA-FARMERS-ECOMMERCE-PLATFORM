@@ -1,54 +1,133 @@
-// import { createContext, useState, useEffect } from 'react';
-// import { authService } from '../services/api'; // Correct import
+import { createContext, useState, useEffect, useMemo, useCallback } from "react";
 
-// export const AuthContext = createContext();
+const AuthContext = createContext();
 
-// export const AuthProvider = ({ children }) => {
-//   const [user, setUser] = useState(null);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const checkAuth = async () => {
-//       try {
-//         const response = await authService.getProfile(); // Use getProfile
-//         if (response.data) {
-//           setUser(response.data);
-//         }
-//       } catch (error) {
-//         console.error('Error fetching user:', error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     checkAuth();
-//   }, []);
-
-//   return (
-//     <AuthContext.Provider value={{ user, setUser, loading }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-import React, { createContext, useState, useEffect } from "react";
-import  getProfile  from "../services/api.js"; // Now directly using the function from api.js
-
-export const AuthContext = createContext();
-
-export const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [usersDB, setUsersDB] = useState(() => {
+    const storedUsers = localStorage.getItem("kenyafarmers-users");
+    return storedUsers ? JSON.parse(storedUsers) : [
+      {
+        id: 1,
+        name: "Demo User",
+        email: "user@example.com",
+        phone: "+254700000001",
+        password: "password",
+        createdAt: new Date().toISOString(),
+        profile: { bio: "Sample bio", location: "Nairobi", avatar: "/images/avatar.jpg" },
+        preferences: { theme: "light", notifications: true },
+      },
+    ];
+  });
 
   useEffect(() => {
-    getProfile()
-      .then(setUser)
-      .catch((error) => console.error("Error fetching user:", error));
+    const storedUser = localStorage.getItem("kenyafarmers-user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setLoading(false);
   }, []);
 
-  return (
-    <AuthContext.Provider value={{ user }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  useEffect(() => {
+    localStorage.setItem("kenyafarmers-users", JSON.stringify(usersDB));
+  }, [usersDB]);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("kenyafarmers-user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("kenyafarmers-user");
+    }
+  }, [user]);
+
+  const register = useCallback(async (userData) => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    if (usersDB.some((u) => u.email === userData.email)) {
+      throw new Error("Email already registered");
+    }
+
+    const newUser = {
+      id: Date.now(),
+      ...userData,
+      createdAt: new Date().toISOString(),
+      profile: { bio: "", location: "", avatar: "" },
+      preferences: { theme: "light", notifications: true },
+    };
+
+    setUsersDB((prevUsers) => [...prevUsers, newUser]);
+    return newUser;
+  }, [usersDB]);
+
+  const login = useCallback(async (email, password) => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const foundUser = usersDB.find((u) => u.email === email && u.password === password);
+    if (!foundUser) {
+      throw new Error("Invalid email or password");
+    }
+
+    setUser(foundUser);
+    return foundUser;
+  }, [usersDB]);
+
+  const logout = useCallback(() => {
+    setUser(null);
+  }, []);
+
+  const updateProfile = useCallback(async (updatedData) => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    setUser((prevUser) => {
+      if (!prevUser) return prevUser;
+
+      const updatedUser = {
+        ...prevUser,
+        ...updatedData,
+        profile: { ...prevUser.profile, ...updatedData.profile },
+      };
+
+      setUsersDB((prevUsers) =>
+        prevUsers.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+      );
+
+      return updatedUser;
+    });
+  }, []);
+
+  const updatePreferences = useCallback(async (preferences) => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    setUser((prevUser) => {
+      if (!prevUser) return prevUser;
+
+      const updatedUser = {
+        ...prevUser,
+        preferences: { ...prevUser.preferences, ...preferences },
+      };
+
+      setUsersDB((prevUsers) =>
+        prevUsers.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+      );
+
+      return updatedUser;
+    });
+  }, []);
+
+  const value = useMemo(() => ({
+    user,
+    loading,
+    usersDB,
+    register,
+    login,
+    logout,
+    updateProfile,
+    updatePreferences,
+  }), [user, loading, usersDB, register, login, logout, updateProfile, updatePreferences]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+export { AuthProvider };
+export default AuthContext;
