@@ -1,236 +1,245 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../features/auth/authSlice';
+// src/components/Navbar.jsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const Navbar = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { isAuthenticated, user, role } = useSelector((state) => state.auth);
-  const { totalItems } = useSelector((state) => state.cart);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate('/');
-  };
-
-  const getNavLinks = () => {
-    if (!isAuthenticated) {
-      return [
-        { name: 'Home', path: '/' },
-        { name: 'Produce Market', path: '/marketplace/produce' },
-        { name: 'Agri Inputs', path: '/marketplace/agri-inputs' },
-        { name: 'Login', path: '/login' },
-        { name: 'Register', path: '/register' },
-      ];
-    }
-
-    const commonLinks = [
-      { name: 'Home', path: '/' },
-      { name: 'Produce Market', path: '/marketplace/produce' },
-      { name: 'Agri Inputs', path: '/marketplace/agri-inputs' },
-    ];
-
-    switch (role) {
-      case 'farmer':
-        return [
-          ...commonLinks,
-          { name: 'My Produce', path: '/dashboard/my-produce' },
-          { name: 'My Orders', path: '/dashboard/orders' },
-          { name: 'Find Transport', path: '/transport' },
-        ];
-      case 'buyer':
-        return [
-          ...commonLinks,
-          { name: 'My Orders', path: '/dashboard/orders' },
-        ];
-      case 'transporter':
-        return [
-          ...commonLinks,
-          { name: 'Transport Requests', path: '/dashboard/transport' },
-        ];
-      case 'vendor':
-        return [
-          ...commonLinks,
-          { name: 'My Products', path: '/dashboard/my-products' },
-          { name: 'Orders', path: '/dashboard/orders' },
-        ];
-      default:
-        return commonLinks;
-    }
+  // Function to check if the current path matches a given route
+  const isActiveRoute = (route) => {
+    return location.pathname === route;
   };
 
   return (
-    <nav 
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-gray-800 shadow-xl' : 'bg-gray-800 bg-opacity-95'
-      }`}
-    >
-      <div className="border-b border-green-400 border-opacity-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          {/* Decorative elements */}
-          <div className="absolute left-0 top-0 w-16 h-16 bg-green-500 bg-opacity-20 rounded-br-full"></div>
-          <div className="absolute right-0 bottom-0 w-16 h-16 bg-green-500 bg-opacity-20 rounded-tl-full"></div>
+    <nav className="bg-gradient-to-r from-green-800 to-green-600 shadow-lg relative">
+      {/* Updated Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-yellow-400"></div>
+      <div className="hidden lg:block absolute -bottom-3 -left-3 w-8 h-8 rounded-full bg-green-900 opacity-10"></div>
+      <div className="hidden lg:block absolute -right-2 top-2 w-6 h-6 rounded-full bg-yellow-400 opacity-10"></div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              <div className="relative">
+                <img
+                  className="h-8 w-8 sm:h-10 sm:w-10 rounded-full shadow-md border border-green-300"
+                  src="https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZmFybWluZ3xlbnwwfHwwfHx8MA%3D%3D"
+                  alt="Kenya Farmers App"
+                />
+                <div className="absolute inset-0 rounded-full border border-yellow-300 animate-pulse opacity-30"></div>
+              </div>
+              <span className="ml-2 text-base sm:text-xl font-bold text-white">KenyaFarmers</span>
+            </Link>
+          </div>
           
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="flex-shrink-0 flex items-center group">
-                <div className="relative p-1">
-                  <div className="absolute inset-0 bg-green-400 rounded-full transform transition-all duration-300 group-hover:scale-110 opacity-20"></div>
-                  <img
-                    className="h-10 w-auto relative z-10"
-                    src="/logo.svg"
-                    alt="KenyaFarmers.com"
-                  />
-                </div>
-                <div className="ml-2 overflow-hidden">
-                  <span className="text-xl font-bold text-white relative inline-block">
-                    Kenya
-                    <span className="text-green-400">Farmers</span>
-                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-green-500 transform transition-transform duration-300 origin-left scale-x-0 group-hover:scale-x-100"></span>
-                  </span>
-                </div>
+          {/* Desktop menu */}
+          <div className="hidden md:flex items-center">
+            <div className="flex space-x-1 lg:space-x-4">
+              <Link 
+                to="/" 
+                className={`px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 relative group ${
+                  isActiveRoute('/') 
+                    ? 'bg-green-800 text-white' 
+                    : 'text-white hover:bg-green-600 hover:text-white'
+                }`}
+              >
+                Home
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-yellow-300 group-hover:w-4/5 transition-all duration-300"></span>
+              </Link>
+              <Link 
+                to="/vendors" 
+                className={`px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 relative group ${
+                  isActiveRoute('/vendors') 
+                    ? 'bg-green-800 text-white' 
+                    : 'text-white hover:bg-green-600 hover:text-white'
+                }`}
+              >
+                Vendors
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-yellow-300 group-hover:w-4/5 transition-all duration-300"></span>
+              </Link>
+              <Link 
+                to="/products" 
+                className={`px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 relative group ${
+                  isActiveRoute('/products') 
+                    ? 'bg-green-800 text-white' 
+                    : 'text-white hover:bg-green-600 hover:text-white'
+                }`}
+              >
+                Products
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-yellow-300 group-hover:w-4/5 transition-all duration-300"></span>
+              </Link>
+              <Link 
+                to="/farmers" 
+                className={`px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 relative group ${
+                  isActiveRoute('/farmers') 
+                    ? 'bg-green-800 text-white' 
+                    : 'text-white hover:bg-green-600 hover:text-white'
+                }`}
+              >
+                Farmers
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-yellow-300 group-hover:w-4/5 transition-all duration-300"></span>
+              </Link>
+              <Link 
+                to="/transporters" 
+                className={`px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 relative group ${
+                  isActiveRoute('/transporters') 
+                    ? 'bg-green-800 text-white' 
+                    : 'text-white hover:bg-green-600 hover:text-white'
+                }`}
+              >
+                Transporters
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-yellow-300 group-hover:w-4/5 transition-all duration-300"></span>
               </Link>
             </div>
-
-            {/* Desktop navigation */}
-            <div className="hidden md:flex md:items-center md:space-x-4">
-              {getNavLinks().map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 text-gray-200 relative overflow-hidden group"
-                >
-                  <span className="relative z-10">{link.name}</span>
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-green-400 transform transition-all duration-300 -translate-x-full group-hover:translate-x-0"></span>
-                  <span className="absolute inset-0 bg-green-600 rounded-md transform transition-transform duration-300 origin-top scale-y-0 group-hover:scale-y-100 opacity-0 group-hover:opacity-20"></span>
-                </Link>
-              ))}
-              {isAuthenticated && (
-                <>
-                  <Link to="/cart" className="px-3 py-2 rounded-md text-sm font-medium relative transition-all duration-300 text-gray-200 hover:text-white group">
-                    <span className="sr-only">Cart</span>
-                    <div className="relative">
-                      <span className="absolute inset-0 rounded-full bg-green-500 transform transition-transform duration-300 scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-20"></span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                      {totalItems > 0 && (
-                        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-500 rounded-full">
-                          {totalItems}
-                        </span>
-                      )}
-                    </div>
-                  </Link>
-                  <div className="relative ml-3">
-                    <div>
-                      <button
-                        type="button"
-                        className="flex text-sm rounded-full focus:outline-none transition-all duration-300 group"
-                        id="user-menu-button"
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                      >
-                        <span className="sr-only">Open user menu</span>
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white flex items-center justify-center shadow-lg transform transition-transform duration-300 group-hover:scale-110 group-hover:shadow-green-400/50">
-                          {user?.name?.charAt(0) || 'U'}
-                        </div>
-                      </button>
-                    </div>
-                    {isMenuOpen && (
-                      <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-700 ring-1 ring-green-500 ring-opacity-20 z-50 transition-all duration-200 transform opacity-100 border border-green-400 border-opacity-20">
-                        <Link to="/dashboard" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-600 transition-colors duration-200">
-                          Dashboard
-                        </Link>
-                        <Link to="/profile" className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-600 transition-colors duration-200">
-                          Your Profile
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-600 transition-colors duration-200"
-                        >
-                          Sign out
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="flex md:hidden items-center">
-              {isAuthenticated && (
-                <Link to="/cart" className="px-3 py-2 rounded-md text-sm font-medium relative mr-2 transition-all duration-300 text-gray-200 hover:text-white">
-                  <span className="sr-only">Cart</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-500 rounded-full">
-                      {totalItems}
-                    </span>
-                  )}
-                </Link>
-              )}
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-200 hover:text-white hover:bg-gray-700 focus:outline-none transition-all duration-300"
+            <div className="flex items-center ml-4 lg:ml-6">
+              <Link 
+                to="/login" 
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                  isActiveRoute('/login') 
+                    ? 'bg-yellow-600 text-white shadow-md transform scale-105' 
+                    : 'text-white bg-yellow-600 hover:bg-yellow-500 hover:shadow-md hover:transform hover:scale-105'
+                }`}
               >
-                <span className="sr-only">Open main menu</span>
-                {isMenuOpen ? (
-                  <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                Login
+              </Link>
+              <Link 
+                to="/register" 
+                className={`ml-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                  isActiveRoute('/register') 
+                    ? 'bg-yellow-600 text-white shadow-md transform scale-105' 
+                    : 'text-white bg-yellow-600 hover:bg-yellow-500 hover:shadow-md hover:transform hover:scale-105'
+                }`}
+              >
+                Signup
+              </Link>
+            </div>
+          </div>
+          
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-green-600 focus:outline-none"
+              aria-expanded={isOpen}
+              aria-label="Toggle navigation"
+            >
+              <svg
+                className="h-6 w-6"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {isOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 ) : (
-                  <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 )}
-              </button>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Mobile menu */}
+      {isOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-green-700">
+            <Link
+              to="/"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActiveRoute('/') 
+                ? 'bg-green-800 text-white' 
+                : 'text-white hover:bg-green-600'
+              }`}
+              onClick={() => setIsOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              to="/vendors"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActiveRoute('/vendors') 
+                ? 'bg-green-800 text-white' 
+                : 'text-white hover:bg-green-600'
+              }`}
+              onClick={() => setIsOpen(false)}
+            >
+              Vendors
+            </Link>
+            <Link
+              to="/products"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActiveRoute('/products') 
+                ? 'bg-green-800 text-white' 
+                : 'text-white hover:bg-green-600'
+              }`}
+              onClick={() => setIsOpen(false)}
+            >
+              Products
+            </Link>
+            <Link
+              to="/farmers"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActiveRoute('/farmers') 
+                ? 'bg-green-800 text-white' 
+                : 'text-white hover:bg-green-600'
+              }`}
+              onClick={() => setIsOpen(false)}
+            >
+              Farmers
+            </Link>
+            <Link
+              to="/transporters"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActiveRoute('/transporters') 
+                ? 'bg-green-800 text-white' 
+                : 'text-white hover:bg-green-600'
+              }`}
+              onClick={() => setIsOpen(false)}
+            >
+              Transporters
+            </Link>
+            <div className="flex flex-col sm:flex-row sm:space-x-2 pt-2">
+              <Link
+                to="/login"
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-all duration-300 ${
+                  isActiveRoute('/login') 
+                  ? 'bg-yellow-600 text-white shadow-md' 
+                  : 'text-white bg-yellow-600 hover:bg-yellow-500 hover:shadow-md'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className={`block px-3 py-2 mt-2 sm:mt-0 rounded-md text-base font-medium transition-all duration-300 ${
+                  isActiveRoute('/register') 
+                  ? 'bg-yellow-600 text-white shadow-md' 
+                  : 'text-white bg-yellow-600 hover:bg-yellow-500 hover:shadow-md'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                Signup
+              </Link>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Mobile menu, show/hide based on menu state */}
-      <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-700 border-l border-r border-b border-green-400 border-opacity-20 rounded-b-lg shadow-xl">
-          {getNavLinks().map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-200 hover:bg-gray-600 hover:text-white transition-all duration-300"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {link.name}
-            </Link>
-          ))}
-          {isAuthenticated && (
-            <button
-              onClick={() => {
-                handleLogout();
-                setIsMenuOpen(false);
-              }}
-              className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-200 hover:bg-gray-600 hover:text-white transition-all duration-300"
-            >
-              Sign out
-            </button>
-          )}
-          <div className="pt-4 pb-2">
-            <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-20"></div>
-          </div>
-        </div>
-      </div>
+      )}
     </nav>
   );
 };

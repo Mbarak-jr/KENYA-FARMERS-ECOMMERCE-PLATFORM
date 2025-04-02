@@ -1,43 +1,43 @@
 import React from "react";
-import { Tv, ShoppingBag, Home, BookOpen, Sparkles } from "lucide-react";
+import { Wheat, Sprout, Apple, ShoppingCart, Leaf } from "lucide-react"; // Farm-related icons
 
 const categories = [
   { 
     id: 1, 
-    name: "Electronics", 
-    icon: <Tv size={64} color="#3B82F6" strokeWidth={1.5} />,
-    bgColor: "#EFF6FF"
-  },
-  { 
-    id: 2, 
-    name: "Fashion", 
-    icon: <ShoppingBag size={64} color="#EC4899" strokeWidth={1.5} />,
-    bgColor: "#FCE7F3"
-  },
-  { 
-    id: 3, 
-    name: "Home Appliances", 
-    icon: <Home size={64} color="#10B981" strokeWidth={1.5} />,
-    bgColor: "#ECFDF5" 
-  },
-  { 
-    id: 4, 
-    name: "Books", 
-    icon: <BookOpen size={64} color="#F59E0B" strokeWidth={1.5} />,
+    name: "Grains & Cereals", 
+    icon: <Wheat size={64} color="#F59E0B" strokeWidth={1.5} />, 
     bgColor: "#FEF3C7" 
   },
   { 
-    id: 5, 
-    name: "Beauty", 
-    icon: <Sparkles size={64} color="#8B5CF6" strokeWidth={1.5} />,
+    id: 2, 
+    name: "Fresh Vegetables", 
+    icon: <Sprout size={64} color="#10B981" strokeWidth={1.5} />, 
+    bgColor: "#ECFDF5" 
+  },
+  { 
+    id: 3, 
+    name: "Fruits & Nuts", 
+    icon: <Apple size={64} color="#DC2626" strokeWidth={1.5} />, 
+    bgColor: "#FEE2E2" 
+  },
+  { 
+    id: 4, 
+    name: "Farm Produce", 
+    icon: <ShoppingCart size={64} color="#A855F7" strokeWidth={1.5} />, 
     bgColor: "#EDE9FE" 
+  },
+  { 
+    id: 5, 
+    name: "Organic Herbs", 
+    icon: <Leaf size={64} color="#22C55E" strokeWidth={1.5} />, 
+    bgColor: "#DCFCE7" 
   }
 ];
 
 const Categories = () => {
   return (
     <div className="py-16 px-4 text-center bg-gray-50">
-      <h2 className="text-3xl font-semibold mb-8">Shop by Categories</h2>
+      <h2 className="text-3xl font-semibold mb-8">Shop by Farm Categories</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {categories.map((category) => (
           <div 
