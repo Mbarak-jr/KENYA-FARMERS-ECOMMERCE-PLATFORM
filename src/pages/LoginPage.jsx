@@ -16,14 +16,21 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRegistrationSuccess, setShowRegistrationSuccess] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
-  // Check for registration success state
+  // Check for registration success state and handle initial animation
   useEffect(() => {
     if (location.state?.fromRegistration) {
       setShowRegistrationSuccess(true);
-      // Clear the location state to prevent showing the message again on refresh
       navigate(location.pathname, { replace: true, state: {} });
     }
+    
+    // Trigger form animation after component mounts
+    const timer = setTimeout(() => {
+      setShowForm(true);
+    }, 50);
+    
+    return () => clearTimeout(timer);
   }, [location, navigate]);
 
   const handleChange = (e) => {
@@ -62,43 +69,35 @@ const LoginPage = () => {
     if (!validateForm()) return;
     
     setIsSubmitting(true);
-    setErrors({}); // Clear previous errors
+    setErrors({});
     
     try {
       await login(formData.email, formData.password);
-      // Redirect to dashboard regardless of role
       const redirectTo = location.state?.from?.pathname || "/dashboard";
       navigate(redirectTo, { replace: true });
     } catch (error) {
-      // Handle different types of errors
       if (error.response) {
-        // Server returned an error response
         const status = error.response.status;
         
         if (status === 404) {
-          // User not found
           setErrors({
             form: "Account not found. Please check your email or register if you don't have an account."
           });
         } else if (status === 401) {
-          // Invalid credentials
           setErrors({
             form: "Invalid credentials. Please check your email and password."
           });
         } else {
-          // Other error responses
           setErrors({ 
             form: error.response.data?.message || "Login failed. Please try again later.",
             ...(error.response.data?.errors || {})
           });
         }
       } else if (error.request) {
-        // No response received
         setErrors({
           form: "Connection error. Please check your internet connection and try again."
         });
       } else {
-        // Generic error message
         setErrors({ 
           form: error.message || "Login failed. Please try again later."
         });
@@ -108,11 +107,9 @@ const LoginPage = () => {
     }
   };
 
-  // Show success message if coming from registration
   if (showRegistrationSuccess) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        {/* Background elements remain the same */}
         <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-gray-100 z-0"></div>
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-green-200 rounded-full opacity-20 blur-3xl"></div>
@@ -131,13 +128,13 @@ const LoginPage = () => {
               <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-green-400 rounded-full border-2 border-white"></div>
             </div>
           </div>
-          <div className="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-gray-200 text-center">
+          <div className="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-gray-200 text-center animate-fade-in">
             <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md">
               Registration successful! Please log in with your credentials.
             </div>
             <button
               onClick={() => setShowRegistrationSuccess(false)}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-transform hover:scale-[1.02]"
             >
               Continue to Login
             </button>
@@ -149,7 +146,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Background elements remain the same */}
+      {/* Background elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-gray-100 z-0"></div>
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-green-200 rounded-full opacity-20 blur-3xl"></div>
@@ -157,6 +154,7 @@ const LoginPage = () => {
         <div className="absolute -bottom-24 left-1/3 w-64 h-64 bg-green-300 rounded-full opacity-10 blur-3xl"></div>
       </div>
       
+      {/* Logo and heading section */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md z-10 relative">
         <div className="flex justify-center">
           <div className="relative">
@@ -176,10 +174,11 @@ const LoginPage = () => {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 relative">
+      {/* Form section with animation */}
+      <div className={`mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 relative transition-all duration-500 ease-out ${showForm ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         <div className="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-gray-200">
           {errors.form && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm animate-shake">
               {errors.form}
             </div>
           )}
@@ -190,6 +189,12 @@ const LoginPage = () => {
                 Email address
               </label>
               <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                </div>
                 <input
                   id="email"
                   name="email"
@@ -198,7 +203,7 @@ const LoginPage = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className={`appearance-none block w-full px-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm`}
+                  className={`appearance-none block w-full pl-10 px-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm`}
                   disabled={isSubmitting}
                 />
                 {errors.email && (
@@ -219,6 +224,11 @@ const LoginPage = () => {
                 Password
               </label>
               <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
                 <input
                   id="password"
                   name="password"
@@ -227,7 +237,7 @@ const LoginPage = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className={`appearance-none block w-full px-3 py-2 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm`}
+                  className={`appearance-none block w-full pl-10 px-3 py-2 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm`}
                   disabled={isSubmitting}
                 />
                 {errors.password && (
@@ -262,7 +272,7 @@ const LoginPage = () => {
               <div className="text-sm">
                 <Link 
                   to="/forgot-password" 
-                  className="font-medium text-green-600 hover:text-green-500"
+                  className="font-medium text-green-600 hover:text-green-500 transition-colors duration-200"
                   tabIndex={isSubmitting ? -1 : 0}
                 >
                   Forgot your password?
@@ -302,7 +312,7 @@ const LoginPage = () => {
             <div className="mt-6">
               <Link
                 to="/register"
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 hover:shadow-md"
                 tabIndex={isSubmitting ? -1 : 0}
               >
                 Create an account
@@ -313,7 +323,7 @@ const LoginPage = () => {
       </div>
       
       <div className="mt-8 text-center text-sm text-gray-500 z-10">
-        <p>Need help? <a href="#" className="text-green-600 hover:text-green-500">Contact our support team</a></p>
+        <p>Need help? <a href="#" className="text-green-600 hover:text-green-500 transition-colors duration-200">Contact our support team</a></p>
       </div>
     </div>
   );

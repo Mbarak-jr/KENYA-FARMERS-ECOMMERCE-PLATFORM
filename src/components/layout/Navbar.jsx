@@ -46,9 +46,9 @@ const Navbar = () => {
             </Link>
           </div>
           
-          {/* Desktop menu */}
+          {/* Desktop menu - Updated with responsive fixes */}
           <div className="hidden md:flex items-center">
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap justify-end space-x-1 sm:space-x-2 max-w-[500px]">
               {[
                 { path: '/', name: 'Home' },
                 { path: '/vendors', name: 'Vendors' },
@@ -59,7 +59,7 @@ const Navbar = () => {
                 <Link 
                   key={item.path}
                   to={item.path} 
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative group ${
+                  className={`px-2 sm:px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative group ${
                     isActiveRoute(item.path) 
                       ? 'text-green-700 bg-amber-50 shadow-inner' 
                       : 'text-gray-700 hover:text-green-700 hover:bg-amber-50'
@@ -73,11 +73,11 @@ const Navbar = () => {
               ))}
             </div>
             
-            <div className="flex items-center ml-6">
+            <div className="flex items-center ml-2 sm:ml-4">
               <div className="flex bg-gradient-to-r from-amber-500 to-green-600 rounded-lg overflow-hidden shadow-lg">
                 <Link 
                   to="/login" 
-                  className={`px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
+                  className={`px-3 sm:px-4 py-2 text-sm font-medium transition-all duration-300 ${
                     isActiveRoute('/login') 
                       ? 'bg-white/20 text-white' 
                       : 'text-white hover:bg-white/10'
@@ -88,7 +88,7 @@ const Navbar = () => {
                 <div className="w-px bg-white/30 my-2"></div>
                 <Link 
                   to="/register" 
-                  className={`px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
+                  className={`px-3 sm:px-4 py-2 text-sm font-medium transition-all duration-300 ${
                     isActiveRoute('/register') 
                       ? 'bg-white/20 text-white' 
                       : 'text-white hover:bg-white/10'
